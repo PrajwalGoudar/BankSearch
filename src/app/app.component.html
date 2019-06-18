@@ -1,0 +1,74 @@
+<div>
+  <div class="div-head row">
+    <div style="flex-grow: 1">
+        <h4>BankSearch</h4>
+    </div>
+    <div style="flex-grow: 4">
+        <input [(ngModel)]="searchText" placeholder="Search for Bank" class="filter-input">
+    </div>
+    <div style="flex-grow: 1">
+        <label>City: </label>
+        <select (change)="filterCity($event.target.value)">
+            <option value="0">Mumbai</option>
+            <option value="1">Delhi</option>
+            <option value="2">Pune</option>
+            <option value="3">Bangalore</option>
+        </select>
+    </div>
+    <div style="flex-grow: 4" class="container" style="background-color: whitesmoke">
+        <h3 style="color:rgb(34, 34, 34)">{{switchString}}</h3>
+        <div class="checkbox-container green">
+          <input type="checkbox" id="toggle2" (change)="onClickSwitch()"/>
+          <label for="toggle2"></label>
+          <div class="active-circle"></div>
+        </div>
+</div>
+  </div>
+  <div>
+          <div class="row">
+            <div style="flex-grow: 2">
+                <h3>No. of Rows: {{noOfRows}}</h3>
+            </div>
+            <div style="flex-grow: 2">
+                <label style="margin-right: 20px; font-size: 20px">Enter no. of rows or use the slider below:</label>
+                <input type="number" min="1" max="{{bank.length}}" value="{{noOfRows}}" (input)="pagination($event.target.value)" class="increaseFont">
+            </div>
+            <div style="flex-grow: 2">
+                <button (click)="prevPage()">Prev</button>
+                <button (click)="nextPage()">Next</button>
+            </div>
+           </div>
+          <div class="customSlider">
+              <input type="range" min="1" max="{{bank.length}}" value="{{noOfRows}}" class="slider" (input)="pagination($event.target.value)">
+          </div>
+    </div>
+  <table>
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>IFSC</th>
+        <th>Branch</th>
+        <th>Address</th>
+        <th>Mark as Favourite</th>
+      </tr>
+      <tr *ngFor="let b of tempBank | filter : searchText">
+        <td>{{ b.bank_id }}</td>
+        <td>{{ b.bank_name }}</td>
+        <td>{{ b.ifsc }}</td>
+        <td>{{ b.branch }}</td>
+        <td>{{ b.address }}</td>
+        <td>
+            <div class="page__toggle">
+                <label class="toggle">
+                  <input class="toggle__input" type="checkbox" (change)="getFav($event.target.value)" name="bank"
+                  value="{{ b.ifsc }}">
+                  <span class="toggle__label">
+                    <span class="toggle__text"></span>
+                  </span>
+                </label>
+              </div>
+        </td>
+      </tr>
+  </table>
+  <h4 style="padding: 0% 25%">{{loading}}</h4>
+</div>
