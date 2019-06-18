@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AppComponent {
   // Bank data
+  searchText: string = '';
   bank = [];
   loading = 'Please wait untill I fill these columns for you..!';
   switchString = 'Switch to Favourites';
