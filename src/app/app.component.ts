@@ -8,20 +8,23 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AppComponent {
   // Bank data
-  searchText: string = '';
   bank = [];
-  loading = 'Please wait untill I fill these columns for you..!';
+  favMessage: boolean = false;
+  loading: boolean = true;
   switchString = 'Switch to Favourites';
-  switchBool = 0;
+  searchText: String = '';
+  switchBool:boolean = false;
   tempBank = [];
-  mumbaiBanks = [];
-  delhiBanks = [];
-  bangaloreBanks = [];
-  puneBanks = [];
+  apiRoot = 'https://vast-shore-74260.herokuapp.com/banks?city=';
+  cityName = '';
+  pageNumber: number = 1;
+  searchBool: boolean = false;
+  boolPage: boolean = false;
   favBanks = [];
   startPointer = 0;
   endPointer = 0;
   noOfRows = 10;
+  buttonList = [1,2,3,4,5];
 
   getFav(favBank: any) {
     for ( let i = 0; i < this.favBanks.length; i++) {
@@ -41,19 +44,19 @@ export class AppComponent {
   onClickSwitch() {
     if (!this.switchBool) {
       if (!this.favBanks.length) {
-        this.loading = 'Your favourites are added here, try adding some.';
-        this.switchBool = 1;
+        this.favMessage = true;
+        this.switchBool = true;
         this.switchString = 'Switch to Browse Mode';
         this.tempBank = [];
       } else {
-      this.loading = '';
-      this.switchBool = 1;
+      this.favMessage = false;
+      this.switchBool = true;
       this.switchString = 'Switch to Browse Mode';
       this.tempBank = this.favBanks;
       }
     } else {
-      this.loading = '';
-      this.switchBool = 0;
+      this.favMessage = false;
+      this.switchBool = false;
       this.switchString = 'Switch to Favourites';
       this.pagination(this.noOfRows) ;
     }
@@ -63,10 +66,13 @@ export class AppComponent {
     let i;
     this.tempBank = [];
     this.noOfRows = noOfRows;
+    if(this.boolPage){
+      this.startPointer = Number(this.noOfRows) * (this.pageNumber-1);
+      this.boolPage = false;
+    }
     if (Number(noOfRows) < this.bank.length) {
       for ( i = this.startPointer; i < Number(this.startPointer) + Number(noOfRows); i++) {
         this.tempBank.push(this.bank[i]);
-        console.log(i);
       }
     } else {
       this.tempBank = this.bank;
@@ -74,19 +80,49 @@ export class AppComponent {
     this.endPointer = i;
   }
 
+  randomFunc(){
+    if(this.searchText.length > 0){
+      this.searchBool = true;
+    } else {
+      this.searchBool = false;
+    }
+  }
+  
+
+
+  
+  changeButtonNumber(value: number) {
+    if(value<1){
+      value = 1;
+    } 
+    if(value >= this.bank.length){
+      value = this.bank.length;
+    }
+    for(let i=0; i<5; i++){
+      this.buttonList[i] = value + i; 
+    }   
+  }
+
+  onClickPageNumber(pageNumber: any){
+    this.pageNumber = Number(pageNumber);
+    this.changeButtonNumber(this.pageNumber);
+    this.boolPage = true;
+    this.pagination(this.noOfRows);
+  }
+
   nextPage() {
+    this.changeButtonNumber(this.buttonList[0]+1);
     this.tempBank = [];
     if ((Number(this.endPointer) + Number(this.noOfRows)) <= Number(this.bank.length)) {
-      console.log('I should be here');
       this.startPointer = this.endPointer;
     } else {
-      console.log('I should not be here');
       this.noOfRows = ((this.endPointer + this.noOfRows) - this.bank.length);
     }
     this.pagination(this.noOfRows);
   }
 
   prevPage() {
+    this.changeButtonNumber(this.buttonList[0]-1);
     this.tempBank = [];
     if ((Number(this.startPointer) - Number(this.noOfRows)) >= 0) {
       this.startPointer -= this.noOfRows;
@@ -97,23 +133,35 @@ export class AppComponent {
   }
 
   filterCity(filval: any) {
+    this.cityName = String(filval);
+    this.tempBank = [];
+    this.loading = true;
     switch (filval) {
-       case '0' : this.bank = this.mumbaiBanks; this.pagination(this.noOfRows); break;
-       case '1' : this.bank = this.delhiBanks; this.pagination(this.noOfRows); break;
-       case '2' : this.bank = this.puneBanks; this.pagination(this.noOfRows); break;
-       case '3' : this.bank = this.bangaloreBanks; this.pagination(this.noOfRows); break;
+       case 'MUMBAI' : this.fetchData('MUMBAI'); 
+                      break;
+       case 'DELHI' : this.fetchData('DELHI'); 
+                      break;
+       case 'PUNE' : this.fetchData('PUNE');
+                     break;
+       case 'BANGALORE' : this.fetchData('BANGALORE');
+                          break;
     }
   }
 
+  fetchData(cityName: any){
+    let promise = new Promise((resolve, reject) => {
+      let apiURL = `${this.apiRoot}${cityName}`;
+      this.http.get(apiURL)
+        .toPromise()
+        .then(
+         (res: any )=> {
+            this.bank = res; this.loading = false; this.pagination(this.noOfRows);
+          }
+        );
+    });
+  }
+
   constructor(private http: HttpClient) {
-    this.http.get('https://vast-shore-74260.herokuapp.com/banks?city=MUMBAI').
-    subscribe((response: any[]) => {
-      this.bank = response; this.mumbaiBanks = this.bank; this.loading = ''; this.pagination(this.noOfRows); });
-    this.http.get('https://vast-shore-74260.herokuapp.com/banks?city=DELHI').
-    subscribe((response: any[]) => { this.delhiBanks = response; });
-    this.http.get('https://vast-shore-74260.herokuapp.com/banks?city=BANGALORE').
-    subscribe((response: any[]) => { this.bangaloreBanks = response; });
-    this.http.get('https://vast-shore-74260.herokuapp.com/banks?city=PUNE').
-    subscribe((response: any[]) => { this.puneBanks = response; });
+    this.filterCity('MUMBAI');
   }
 }

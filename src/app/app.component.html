@@ -4,15 +4,17 @@
         <h4>BankSearch</h4>
     </div>
     <div style="flex-grow: 4">
-        <input [(ngModel)]="searchText" placeholder="Search for Bank" class="filter-input">
+        <input [(ngModel)]="searchText" 
+       (input)="randomFunc()" placeholder="Search for Bank" class="filter-input">
+
     </div>
     <div style="flex-grow: 1">
         <label>City: </label>
-        <select (change)="filterCity($event.target.value)">
-            <option value="0">Mumbai</option>
-            <option value="1">Delhi</option>
-            <option value="2">Pune</option>
-            <option value="3">Bangalore</option>
+        <select (change)="filterCity($event.target.value)" style="font-size: 20px">
+            <option value="MUMBAI">Mumbai</option>
+            <option value="DELHI">Delhi</option>
+            <option value="PUNE">Pune</option>
+            <option value="BANGALORE">Bangalore</option>
         </select>
     </div>
     <div style="flex-grow: 4" class="container" style="background-color: whitesmoke">
@@ -30,45 +32,82 @@
                 <h3>No. of Rows: {{noOfRows}}</h3>
             </div>
             <div style="flex-grow: 2">
-                <label style="margin-right: 20px; font-size: 20px">Enter no. of rows or use the slider below:</label>
-                <input type="number" min="1" max="{{bank.length}}" value="{{noOfRows}}" (input)="pagination($event.target.value)" class="increaseFont">
+              <select (change)="pagination($event.target.value)" style="font-size: 20px">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
             </div>
-            <div style="flex-grow: 2">
-                <button (click)="prevPage()">Prev</button>
-                <button (click)="nextPage()">Next</button>
+            <div style="flex-grow: 6">
+              <div class="row">
+                <div style="flex-grow: 1">
+                    <button (click)="prevPage()">Prev</button>
+                </div>
+                <div *ngFor = "let button of buttonList" style="flex-grow: 1"> 
+                  <button (click)="onClickPageNumber($event.target.value)" value="{{button}}">{{button}}</button>
+                </div>
+                <div style="flex-grow: 1">
+                    <button (click)="nextPage()">Next</button>
+                </div>
+              </div>
             </div>
            </div>
-          <div class="customSlider">
+          <!-- <div class="customSlider">
               <input type="range" min="1" max="{{bank.length}}" value="{{noOfRows}}" class="slider" (input)="pagination($event.target.value)">
-          </div>
+          </div> -->
     </div>
   <table>
-      <tr>
-        <th>Id</th>
-        <th>Name</th>
-        <th>IFSC</th>
-        <th>Branch</th>
-        <th>Address</th>
-        <th>Mark as Favourite</th>
-      </tr>
-      <tr *ngFor="let b of tempBank | filter : searchText">
-        <td>{{ b.bank_id }}</td>
-        <td>{{ b.bank_name }}</td>
-        <td>{{ b.ifsc }}</td>
-        <td>{{ b.branch }}</td>
-        <td>{{ b.address }}</td>
-        <td>
-            <div class="page__toggle">
-                <label class="toggle">
-                  <input class="toggle__input" type="checkbox" (change)="getFav($event.target.value)" name="bank"
-                  value="{{ b.ifsc }}">
-                  <span class="toggle__label">
-                    <span class="toggle__text"></span>
-                  </span>
-                </label>
-              </div>
-        </td>
-      </tr>
+     <div *ngIf = "!searchBool">
+          <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>IFSC</th>
+              <th>Branch</th>
+              <th>Address</th>
+              <th>Mark as Favourite</th>
+            </tr>
+        <tr *ngFor="let b of tempBank">
+          <td>{{ b.bank_id }}</td>
+          <td>{{ b.bank_name }}</td>
+          <td>{{ b.ifsc }}</td>
+          <td>{{ b.branch }}</td>
+          <td>{{ b.address }}</td>
+          <td>
+              <div class="page__toggle">
+                  <label class="toggle">
+                    <input class="toggle__input" type="checkbox" (change)="getFav($event.target.value)" name="bank"
+                    value="{{ b.ifsc }}">
+                    <span class="toggle__label">
+                      <span class="toggle__text"></span>
+                    </span>
+                  </label>
+                </div>
+          </td>
+        </tr>
+      </div>
+      
+      <div *ngIf="searchBool">
+        <tr  *ngFor="let b of bank| filter : searchText">
+          <td>{{ b.bank_id }}</td>
+          <td>{{ b.bank_name }}</td>
+          <td>{{ b.ifsc }}</td>
+          <td>{{ b.branch }}</td>
+          <td>{{ b.address }}</td>
+          <td>
+              <div class="page__toggle">
+                  <label class="toggle">
+                    <input class="toggle__input" type="checkbox" (change)="getFav($event.target.value)" name="bank"
+                    value="{{ b.ifsc }}">
+                    <span class="toggle__label">
+                      <span class="toggle__text"></span>
+                    </span>
+                  </label>
+                </div>
+          </td>
+        </tr>
+      </div>
   </table>
-  <h4 style="padding: 0% 25%">{{loading}}</h4>
+  <h4 *ngIf="loading" style="padding: 0% 25%">Please wait untill I fill {{ cityName }} bank details for you..!</h4>
+  <h4 *ngIf="favMessage" style="padding: 0% 25%">Your favorite banks are added here, try adding some.</h4>
 </div>
